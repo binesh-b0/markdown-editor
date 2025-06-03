@@ -1,5 +1,6 @@
 import { writable, derived } from 'svelte/store';
 import { renderMarkdown } from './markdown';
+import { debounce } from './utils';
 
 /* ---------- content & preview ---------- */
 
@@ -32,3 +33,12 @@ theme.subscribe((t) => {
     localStorage.setItem('markdown-editor-theme', t);
   }
 });
+
+/* ---------- debounced localStorage writes ---------- */
+
+if (typeof window !== 'undefined') {
+    const saveToLS = debounce((val:string)=>{
+        localStorage.setItem('markdown-editor-content', val);
+    });
+    markdownContent.subscribe(saveToLS);
+};
