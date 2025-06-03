@@ -76,7 +76,7 @@ function bullets(prefix: string) {
   const lines     = block.split('\n');
 
   const patched = lines
-    .map((ln, i) => {
+    .map((ln: string, i: number) => {
       // If the line already starts with the prefix, toggle it off
       if (ln.trimStart().startsWith(prefix.trim())) return ln.replace(prefix, '');
       // For OL we increment numbers; for UL we reuse the prefix

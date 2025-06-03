@@ -142,3 +142,30 @@ html.dark .preview-content code {
 html.dark .preview-content pre {
   background: #2b2b2b;
 }
+
+/* --- tables --- */
+.preview-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+.preview-content th,
+.preview-content td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+}
+
+/* --- task list checkboxes --- */
+.preview-content input[type="checkbox"] {
+  margin-right: 0.4rem;
+}
+
+/* --- highlight ==mark== --- */
+.preview-content mark {
+  background: #fff59b;
+  padding: 0 0.15em;
+}
+html.dark .preview-content mark {
+  background: #7d6b00;
+}
