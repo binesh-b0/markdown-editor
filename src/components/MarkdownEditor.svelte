@@ -2,10 +2,22 @@
   import { markdownContent } from '$lib/stores';
 
   let textareaEl: HTMLTextAreaElement;
+  let lineNumEl: HTMLElement;
  
-  function handleInput(e: Event) {
-    markdownContent.set((e.target as HTMLTextAreaElement).value);
+  function updateLines(text: string) {
+    const lines = text.split('\n').length || 1;
+    if (lineNumEl) {
+      lineNumEl.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
+    }
   }
+
+  function handleInput(e: Event) {
+    const val = (e.target as HTMLTextAreaElement).value;
+    markdownContent.set((e.target as HTMLTextAreaElement).value);
+    updateLines(val);
+  }
+
+  $: updateLines($markdownContent);
 
  export function wrapSelection(prefix: string, suffix = prefix, placeholder = '') {
     const { selectionStart: s, selectionEnd: e, value } = textareaEl;
@@ -29,12 +41,39 @@
     textareaEl.setSelectionRange(cursor, cursor);
   }
 </script>
-
+<style>
+  .editor-wrap {
+    display: flex;
+    height: 100%;
+  }
+  .line-numbers {
+    user-select: none;
+    text-align: right;
+    padding: 0.5rem 0.75rem 0.5rem 0.25rem;
+    border-right: 1px solid var(--border);
+    font-family: var(--mono);
+    opacity: 0.6;
+  }
+  textarea {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    resize: none;
+    font-family: var(--mono);
+    line-height: 1.5;
+    background: inherit;
+    color: inherit;
+    outline: none;
+  }
+</style>
 <!-- textarea automatically bound via store subscription -->
-<textarea
+<div class = "editor-wrap">
+    <pre class="line-numbers" bind:this={lineNumEl}></pre>
+    <textarea
   bind:this={textareaEl}
   bind:value={$markdownContent}
   on:input={handleInput}
   spellcheck="false"
   placeholder="# Start typing Markdown..."
 ></textarea>
+</div>

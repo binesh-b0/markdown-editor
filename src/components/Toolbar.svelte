@@ -1,20 +1,14 @@
 <script lang="ts">
   import { theme, dirty } from '$lib/stores';
-  import { get } from 'svelte/store';
 
-  /* callback props wired up in +page.svelte */
+  /* handlers passed from +page */
   export let onOpen: () => void;
   export let onSave: () => void;
-  export let bold: () => void;
-  export let italic: () => void;
-  export let heading: () => void;
-  export let link: () => void;
-  export let image: () => void;
-  export let codeblk: () => void;
-  export let ul: () => void;
-  export let ol: () => void;
-  export let quote: () => void;
-  export let hr: () => void;
+  export let fmt: Record<string, () => void>;
+  export let showMetaPanel: () => void;
+
+  /* kebab menu toggle */
+  let menuOpen = false;
 
   function toggleTheme() {
     theme.update((t) => (t === 'light' ? 'dark' : 'light'));
@@ -24,43 +18,92 @@
 <!-- svelte-ignore css_unused_selector -->
 <style>
   .toolbar {
-    height: 52px;
     display: flex;
     align-items: center;
+    height: 52px;
     padding: 0 0.75rem;
-    gap: 0.5rem;
+    gap: 0.25rem;
     border-bottom: 1px solid var(--border);
   }
-  button {
-    font-size: 1rem;
+  .toolbar button {
     background: none;
     border: none;
+    font-size: 1rem;
     cursor: pointer;
+    padding: 0.25rem 0.5rem;
   }
-  .unsaved { margin-left: auto; font-style: italic; color: #d9534f; }
+  .group-divider {
+    width: 1px;
+    height: 60%;
+    background: var(--border);
+    margin: 0 0.25rem;
+  }
+  .unsaved {
+    margin-left: auto;
+    color: #d9534f;
+    font-style: italic;
+  }
   html.dark .unsaved { color: #e07a5f; }
+
+  /* kebab dropdown */
+  .menu {
+    position: relative;
+  }
+  .dropdown {
+    position: absolute;
+    right: 0;
+    top: 130%;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    padding: 0.25rem 0;
+    z-index: 10;
+  }
+  html.dark .dropdown { background: var(--bg-dark); }
+  .dropdown button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.4rem 0.75rem;
+  }
 </style>
 
 <div class="toolbar">
-  <!-- file -->
-  <button on:click={onOpen} title="Open">📂</button>
-  <button on:click={onSave} title="Save">💾</button>
-  <!-- formatting -->
-  <button on:click={bold}    title="Bold"><b>B</b></button>
-  <button on:click={italic}  title="Italic"><i>I</i></button>
-  <button on:click={heading} title="Heading">H</button>
-  <button on:click={link}    title="Link">🔗</button>
-  <button on:click={image}   title="Image">🖼️</button>
-  <button on:click={codeblk} title="Code">{"<>"}</button>
-  <button on:click={ul}      title="Unordered list">•</button>
-  <button on:click={ol}      title="Ordered list">1.</button>
-  <button on:click={quote}   title="Quote">“</button>
-  <button on:click={hr}      title="Horizontal rule">—</button>
-  <!-- theme -->
+  <!-- File -->
+  <button on:click={onOpen} title="Open (⌘‑O)">📂 Open</button>
+  <button on:click={onSave} title="Save / Download (⌘‑S)">💾 Save</button>
+
+  <div class="group-divider"></div>
+
+  <!-- Formatting -->
+  <button on:click={fmt.bold}    title="Bold **text** (⌘‑B)"><b>B</b></button>
+  <button on:click={fmt.italic}  title="Italic _text_ (⌘‑I)"><i>I</i></button>
+  <button on:click={fmt.heading} title="Heading # (⌘‑H)">H1</button>
+  <button on:click={fmt.link}    title="Link [txt](url)">🔗</button>
+  <button on:click={fmt.image}   title="Image ![alt](url)">🖼️</button>
+  <button on:click={fmt.codeblk} title="Code block ```">⎇</button>
+  <button on:click={fmt.inline}  title="Inline code `code`">⌘</button>
+  <button on:click={fmt.ul}      title="• List">•</button>
+  <button on:click={fmt.ol}      title="1. List">1.</button>
+  <button on:click={fmt.quote}   title="> Quote">❝</button>
+  <button on:click={fmt.hr}      title="Horizontal rule ---">—</button>
+
+  <div class="group-divider"></div>
+
+  <!-- Theme -->
   <button on:click={toggleTheme} title="Toggle theme">
     {#if $theme === 'light'}🌙{:else}🌞{/if}
   </button>
 
-  <!-- unsaved marker -->
+  <!-- kebab -->
+  <div class="menu">
+    <button on:click={() => (menuOpen = !menuOpen)} title="More">⋯</button>
+    {#if menuOpen}
+      <div class="dropdown" on:mouseleave={() => (menuOpen = false)}>
+        <button on:click={() => { menuOpen = false; showMetaPanel(); }}>📝 Metadata</button>
+      </div>
+    {/if}
+  </div>
+
+  <!-- Dirty flag -->
   {#if $dirty}<span class="unsaved">Unsaved</span>{/if}
 </div>

@@ -27,6 +27,13 @@ body {
   --transition: 0.2s ease-in-out;
 }
 
+.line-numbers {
+  background: rgba(0, 0, 0, 0.04);
+}
+html.dark .line-numbers {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 /* light / dark bodies */
 html.light body {
   background: var(--bg-light);
@@ -97,10 +104,17 @@ textarea {
 .preview-content table {
   margin: 0.5rem 0;
 }
+
 .preview-content ul,
 .preview-content ol {
   padding-left: 1.5rem;
+  margin: 0.5rem 0;
+  list-style-position: inside;
 }
+
+.preview-content ul  { list-style-type: disc;   }   /* ● item */
+.preview-content ol  { list-style-type: decimal; }   /* 1. item */
+
 .preview-content blockquote {
   border-left: 4px solid var(--border);
   padding-left: 1rem;

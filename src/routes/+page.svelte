@@ -1,36 +1,36 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { get } from 'svelte/store';
-  import { markdownContent, dirty } from '$lib/stores';
-  import Toolbar        from '$components/Toolbar.svelte';
+  import { markdownContent, dirty, markSaved } from '$lib/stores';
+  import Toolbar from '$components/Toolbar.svelte';
   import MarkdownEditor from '$components/MarkdownEditor.svelte';
   import MarkdownPreview from '$components/MarkdownPreview.svelte';
+  import MetadataPanel from '$components/MetadataPanel.svelte';
 
-  /* editor ref lets us access its exported functions */
+  /* refs */
   let editorRef: InstanceType<typeof MarkdownEditor>;
+  let hiddenInput: HTMLInputElement;
+  let showMeta = false;
 
-  /* ----- File‑System‑Access availability ----- */
-  const hasNativeFS: boolean = typeof window !== 'undefined' && 'showOpenFilePicker' in window;
+  const hasNativeFS = typeof window !== 'undefined' && 'showOpenFilePicker' in window;
 
-  /* ----- open file ----- */
+  /* ---------------- File Open / Save ---------------- */
+
   async function onOpen() {
-    if (get(dirty) && !confirm('Unsaved changes will be lost. Continue?')) return;
-
+    if (get(dirty) && !confirm('You have unsaved work. Continue?')) return;
     if (hasNativeFS) {
       try {
         const [handle] = await (window as any).showOpenFilePicker({
-          types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md', '.markdown'] } }]
+          types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }]
         });
         const file = await handle.getFile();
-        markdownContent.set(await file.text());
-        dirty.set(false);
-      } catch { /* user cancelled */ }
-    } else {
-      hiddenInput.click();
-    }
+        const text = await file.text();
+        markdownContent.set(text);
+        markSaved(text);
+      } catch {}
+    } else hiddenInput.click();
   }
 
-  /* ----- save file ----- */
   async function onSave() {
     const txt = get(markdownContent);
     if (hasNativeFS) {
@@ -39,42 +39,84 @@
           suggestedName: 'document.md',
           types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }]
         });
-        const writer = await handle.createWritable();
-        await writer.write(txt);
-        await writer.close();
-        dirty.set(false);
-      } catch { /* cancelled */ }
+        const w = await handle.createWritable();
+        await w.write(txt);
+        await w.close();
+        markSaved(txt);
+      } catch {}
     } else {
       const blob = new Blob([txt], { type: 'text/markdown' });
-      const url  = URL.createObjectURL(blob);
-      const a    = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
       a.href = url; a.download = 'document.md'; a.click();
       URL.revokeObjectURL(url);
-      dirty.set(false);
+      markSaved(txt);
     }
   }
 
-  /* ----- browser <input type=file> fallback ----- */
-  let hiddenInput: HTMLInputElement;
   function handleFile(e: Event) {
-    const f = (e.target as HTMLInputElement).files?.[0];
-    if (!f) return;
-    f.text().then((t) => {
-      markdownContent.set(t);
-      dirty.set(false);
-      hiddenInput.value = '';          // reset chooser
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    file.text().then((txt) => {
+      markdownContent.set(txt);
+      markSaved(txt);
+      hiddenInput.value = '';
     });
   }
+/* --- Ordered & Unordered list helpers --- */
+function bullets(prefix: string) {
+  const el = editorRef;             // textarea wrapper component
+  const ta = (el as any).$$.ctx[0]; // raw <textarea> element
+  const { value, selectionStart: s, selectionEnd: e } = ta;
 
-  /* ----- load previous session on mount ----- */
+  // Grab the selected block (or current line if nothing selected)
+  const startLine = value.lastIndexOf('\n', s - 1) + 1;
+  const endLine   = e < value.length ? value.indexOf('\n', e) : value.length;
+  const block     = value.slice(startLine, endLine);
+  const lines     = block.split('\n');
+
+  const patched = lines
+    .map((ln, i) => {
+      // If the line already starts with the prefix, toggle it off
+      if (ln.trimStart().startsWith(prefix.trim())) return ln.replace(prefix, '');
+      // For OL we increment numbers; for UL we reuse the prefix
+      return prefix.includes('1.') ? `${i + 1}. ${ln}` : `${prefix}${ln}`;
+    })
+    .join('\n');
+
+  const next = value.slice(0, startLine) + patched + value.slice(endLine);
+  ta.value = next;
+  markdownContent.set(next);
+
+  // keep selection
+  const newEnd = startLine + patched.length;
+  ta.setSelectionRange(startLine, newEnd);
+  ta.focus();
+}
+
+
+  /* ---------------- Formatting helpers ---------------- */
+
+  const fmt = {
+    bold:    () => editorRef.wrapSelection('**', '**', ''),
+    italic:  () => editorRef.wrapSelection('_', '_', ''),
+    heading: () => editorRef.wrapSelection('# ', '', ''),
+    link:    () => editorRef.wrapSelection('[', '](https://)', ''),
+    image:   () => editorRef.insertAtCursor('![alt](https://)', ),
+    codeblk: () => editorRef.wrapSelection('```\n', '\n```', ''),
+    inline:  () => editorRef.wrapSelection('`', '`', 'code'),
+    ul:      () => editorRef.wrapSelection('- ', '', ''),
+    ol:      () => editorRef.wrapSelection('1. ', '', ''),
+    quote:   () => editorRef.wrapSelection('> ', '', ''),
+    hr:      () => editorRef.insertAtCursor('\n---\n')
+  };
+
+  /* ---------------- session restore ---------------- */
+
   onMount(() => {
     const cached = localStorage.getItem('markdown-editor-content');
-    if (cached && confirm('Load previous session?')) {
-      markdownContent.set(cached);
-      dirty.set(true);
-    }
+    if (cached && confirm('Load previous session?')) markdownContent.set(cached);
 
-    /* warn on tab close if dirty */
     window.addEventListener('beforeunload', (e) => {
       if (get(dirty)) {
         e.preventDefault();
@@ -82,23 +124,9 @@
       }
     });
   });
-
-  /* ----- formatting helpers (forward to editor) ----- */
-  const fmt = {
-    bold:    () => editorRef.wrapSelection('**', '**', ''),
-    italic:  () => editorRef.wrapSelection('_', '_', ''),
-    heading: () => editorRef.wrapSelection('# ', '', ''),
-    link:    () => editorRef.wrapSelection('[', '](https://)', 'text'),
-    image:   () => editorRef.insertAtCursor('![alt](https://)', -8),
-    code:    () => editorRef.wrapSelection('```\n', '\n```', 'code'),
-    ul:      () => editorRef.wrapSelection('- ', '', 'item'),
-    ol:      () => editorRef.wrapSelection('1. ', '', 'item'),
-    quote:   () => editorRef.wrapSelection('> ', '', 'quote'),
-    hr:      () => editorRef.insertAtCursor('\n---\n')
-  };
 </script>
 
-<!-- hidden file input for fallback -->
+<!-- hidden input fallback -->
 <input
   type="file"
   accept=".md,.markdown,text/markdown"
@@ -107,22 +135,18 @@
   style="display:none"
 />
 
+<!-- optional metadata panel -->
+{#if showMeta}
+  <MetadataPanel closePanel={() => (showMeta = false)} />
+{/if}
+
 <Toolbar
   onOpen={onOpen}
   onSave={onSave}
-  bold={fmt.bold}
-  italic={fmt.italic}
-  heading={fmt.heading}
-  link={fmt.link}
-  image={fmt.image}
-  codeblk={fmt.code}
-  ul={fmt.ul}
-  ol={fmt.ol}
-  quote={fmt.quote}
-  hr={fmt.hr}
+  fmt={fmt}
+  showMetaPanel={() => (showMeta = !showMeta)}
 />
 
-<!-- main layout -->
 <div class="editor-layout">
   <div class="pane">
     <MarkdownEditor bind:this={editorRef} />
