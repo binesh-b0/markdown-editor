@@ -1,0 +1,130 @@
+/* -------- reset -------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+html,
+body {
+  height: 100%;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* -------- CSS variables -------- */
+:root {
+  /* palette */
+  --bg-light: #ffffff;
+  --text-light: #222;
+  --bg-dark: #1e1e1e;
+  --text-dark: #ddd;
+  --border: #c9c9c9;
+  --accent: #0d6efd;
+
+  /* misc */
+  --mono: ui-monospace, "Courier New", monospace;
+  --transition: 0.2s ease-in-out;
+}
+
+/* light / dark bodies */
+html.light body {
+  background: var(--bg-light);
+  color: var(--text-light);
+}
+html.dark body {
+  background: var(--bg-dark);
+  color: var(--text-dark);
+}
+
+/* -------- layout container -------- */
+.editor-layout {
+  display: flex;
+  height: calc(100vh - 52px); /* header height */
+  overflow: hidden;
+}
+@media (max-width: 767px) {
+  .editor-layout {
+    flex-direction: column;
+    height: auto;
+  }
+}
+
+/* pane basics */
+.pane {
+  flex: 1;
+  padding: 1rem;
+  overflow: auto;
+}
+.pane + .pane {
+  border-left: 1px solid var(--border);
+}
+@media (max-width: 767px) {
+  .pane + .pane {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+}
+
+/* -------- textarea -------- */
+textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  resize: none;
+  font-family: var(--mono);
+  background: inherit;
+  color: inherit;
+  line-height: 1.5;
+  outline: none;
+}
+
+/* -------- markdown preview styling -------- */
+.preview-content h1,
+.preview-content h2,
+.preview-content h3,
+.preview-content h4,
+.preview-content h5,
+.preview-content h6 {
+  margin: 1rem 0 0.5rem;
+  font-weight: 700;
+}
+.preview-content p,
+.preview-content ul,
+.preview-content ol,
+.preview-content blockquote,
+.preview-content pre,
+.preview-content table {
+  margin: 0.5rem 0;
+}
+.preview-content ul,
+.preview-content ol {
+  padding-left: 1.5rem;
+}
+.preview-content blockquote {
+  border-left: 4px solid var(--border);
+  padding-left: 1rem;
+  color: #666;
+}
+html.dark .preview-content blockquote {
+  color: #aaa;
+  border-color: #444;
+}
+.preview-content code {
+  background: #f5f5f5;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: var(--mono);
+}
+html.dark .preview-content code {
+  background: #323232;
+}
+.preview-content pre {
+  background: #f5f5f5;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+html.dark .preview-content pre {
+  background: #2b2b2b;
+}
