@@ -9,6 +9,8 @@
 
   /* refs */
   let editorRef: InstanceType<typeof MarkdownEditor>;
+  let editorPane: HTMLDivElement;
+  let previewPane: HTMLDivElement;
   let hiddenInput: HTMLInputElement;
   let showMeta = false;
 
@@ -111,6 +113,26 @@ function bullets(prefix: string) {
     hr:      () => editorRef.insertAtCursor('\n---\n')
   };
 
+  /* ---------------- pane scroll syncing ---------------- */
+  let syncing = false;
+  function sync(source: 'editor' | 'preview') {
+    if (syncing) return;
+    syncing = true;
+    const src = source === 'editor' ? editorPane : previewPane;
+    const tgt = source === 'editor' ? previewPane : editorPane;
+    const ratio = src.scrollTop / (src.scrollHeight - src.clientHeight || 1);
+    tgt.scrollTop = ratio * (tgt.scrollHeight - tgt.clientHeight);
+    syncing = false;
+  }
+
+  function onHighlight(e: CustomEvent<{ line: number | null }>) {
+    editorRef.highlightLine(e.detail.line);
+  }
+
+  function onJump(e: CustomEvent<{ line: number }>) {
+    editorRef.jumpToLine(e.detail.line);
+  }
+
   /* ---------------- session restore ---------------- */
 
   onMount(() => {
@@ -148,10 +170,18 @@ function bullets(prefix: string) {
 />
 
 <div class="editor-layout">
-  <div class="pane">
+  <div
+    class="pane editor-pane"
+    bind:this={editorPane}
+    on:scroll={() => sync('editor')}
+  >
     <MarkdownEditor bind:this={editorRef} />
   </div>
-  <div class="pane">
-    <MarkdownPreview />
+  <div
+    class="pane preview-pane"
+    bind:this={previewPane}
+    on:scroll={() => sync('preview')}
+  >
+    <MarkdownPreview on:highlight={onHighlight} on:jump={onJump} />
   </div>
 </div>

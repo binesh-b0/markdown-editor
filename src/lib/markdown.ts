@@ -9,6 +9,16 @@ import { full as emoji } from 'markdown-it-emoji'
 // import mksup from 'markdown-it-sup';
 // import mktask from 'markdown-it-task-lists';
 import mkanchor from 'markdown-it-anchor';
+// helper to annotate blocks with source line numbers
+function lineNumbers(md: MarkdownIt) {
+  md.core.ruler.after('block', 'line-numbers', (state) => {
+    state.tokens.forEach((t) => {
+      if (t.map && t.type.endsWith('_open')) {
+        t.attrSet('data-line', String(t.map[0] + 1));
+      }
+    });
+  });
+}
 export const md: MarkdownIt = new MarkdownIt({
     html: true,
     linkify: true,
@@ -32,6 +42,7 @@ export const md: MarkdownIt = new MarkdownIt({
 //   .use(mkdeflist)
 //   // Emoji shortcodes like :joy:
   .use(emoji)
+  .use(lineNumbers)
 //   // ==highlight==
 //   .use(mkmark)
 //   // Subscript: H~2~O
