@@ -100,7 +100,12 @@ function bullets(prefix: string) {
   const fmt = {
     bold:    () => editorRef.wrapSelection('**', '**', ''),
     italic:  () => editorRef.wrapSelection('_', '_', ''),
-    heading: () => editorRef.wrapSelection('# ', '', ''),
+    h1:      () => editorRef.wrapSelection('# ', '', ''),
+    h2:      () => editorRef.wrapSelection('## ', '', ''),
+    h3:      () => editorRef.wrapSelection('### ', '', ''),
+    h4:      () => editorRef.wrapSelection('#### ', '', ''),
+    h5:      () => editorRef.wrapSelection('##### ', '', ''),
+    h6:      () => editorRef.wrapSelection('###### ', '', ''),
     link:    () => editorRef.wrapSelection('[', '](https://)', ''),
     image:   () => editorRef.insertAtCursor('![alt](https://)', ),
     codeblk: () => editorRef.wrapSelection('```\n', '\n```', ''),

@@ -96,6 +96,13 @@ textarea {
   margin: 1rem 0 0.5rem;
   font-weight: 700;
 }
+
+.preview-content h1 { font-size: 2rem; }
+.preview-content h2 { font-size: 1.75rem; }
+.preview-content h3 { font-size: 1.5rem; }
+.preview-content h4 { font-size: 1.25rem; }
+.preview-content h5 { font-size: 1.1rem; }
+.preview-content h6 { font-size: 1rem; }
 .preview-content p,
 .preview-content ul,
 .preview-content ol,
