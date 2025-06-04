@@ -31,6 +31,9 @@ body {
   background: rgba(0, 0, 0, 0.04);
   line-height: 1.5;
 }
+.line-numbers div {
+  height: 1.5em;
+}
 html.dark .line-numbers {
   background: rgba(255, 255, 255, 0.05);
 }
