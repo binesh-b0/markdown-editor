@@ -2,10 +2,10 @@
 
 SvelteKit‑based web app for live Markdown editing and previewing.
 
-[![Vercel Build Status](https://vercelbadge.example.com)](https://vercel.com)  
-[View Live Demo](https://demo.example.com)
 
-![Screenshot](https://image.example.com/screenshot.png)
+[View Live Demo](https://markdown-editor-iota-seven.vercel.app/)
+
+![Screenshot](docs/Screenshot.png)
 
 ---
 ## Installation & Setup
