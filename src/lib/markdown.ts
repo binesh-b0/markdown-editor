@@ -41,20 +41,20 @@ export const md: MarkdownIt = new MarkdownIt({
 //   // Task lists: - [ ] or - [x]
 //   .use(mktask, { enabled: true })
 //   // Heading anchors: ### Title {#custom-id}
-  .use(mkanchor, {
-    // let `{#my-id}` syntax work
-    permalink: mkanchor.permalink.linkInsideHeader({
-      symbol: '¶',
-      placement: 'after'
-    }),
-    slugify: (s: string) =>
-      encodeURIComponent(
-        String(s)
-          .trim()
-          .toLowerCase()
-          .replace(/\s+/g, '-')
-      )
-  });
+  // .use(mkanchor, {
+  //   // let `{#my-id}` syntax work
+  //   permalink: mkanchor.permalink.linkInsideHeader({
+  //     symbol: '¶',
+  //     placement: 'after'
+  //   }),
+  //   slugify: (s: string) =>
+  //     encodeURIComponent(
+  //       String(s)
+  //         .trim()
+  //         .toLowerCase()
+  //         .replace(/\s+/g, '-')
+  //     )
+  // });
 
 export function renderMarkdown(markdown: string): string {
     return md.render(markdown);
