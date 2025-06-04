@@ -80,8 +80,7 @@
   }
 /* --- Ordered & Unordered list helpers --- */
 function bullets(prefix: string, ordered = false) {
-  const el = editorRef;             // textarea wrapper component
-  const ta = (el as any).$$.ctx[0]; // raw <textarea> element
+  const ta = editorRef.getTextarea();
   const { value, selectionStart: s, selectionEnd: e } = ta;
 
   // Grab the selected block (or current line if nothing selected)
@@ -130,14 +129,14 @@ function bullets(prefix: string, ordered = false) {
   /* ---------------- Formatting helpers ---------------- */
 
   function isInCodeBlock(pos: number) {
-    const ta = (editorRef as any).$$.ctx[0] as HTMLTextAreaElement;
+    const ta = editorRef.getTextarea();
     const before = ta.value.slice(0, pos);
     const fences = (before.match(/```/g) || []).length;
     return fences % 2 === 1;
   }
 
   function safeWrap(p: string, sfx = p) {
-    const ta = (editorRef as any).$$.ctx[0] as HTMLTextAreaElement;
+    const ta = editorRef.getTextarea();
     if (isInCodeBlock(ta.selectionStart)) {
       ask('Cannot format text inside a code block');
       return;
@@ -146,7 +145,7 @@ function bullets(prefix: string, ordered = false) {
   }
 
   function heading(level: number) {
-    const ta = (editorRef as any).$$.ctx[0] as HTMLTextAreaElement;
+    const ta = editorRef.getTextarea();
     const { value, selectionStart: s, selectionEnd: e } = ta;
     const startLine = value.lastIndexOf('\n', s - 1) + 1;
     let endLine = value.indexOf('\n', e);
