@@ -73,7 +73,7 @@
 
   $: updateLines($markdownContent);
 
- export function wrapSelection(prefix: string, suffix = prefix, placeholder = '') {
+export function wrapSelection(prefix: string, suffix = prefix, placeholder = '') {
     const { selectionStart: s, selectionEnd: e, value } = textareaEl;
     const selected = value.slice(s, e) || placeholder;
     const updated  = value.slice(0, s) + prefix + selected + suffix + value.slice(e);
@@ -85,7 +85,7 @@
     textareaEl.setSelectionRange(cursor, cursor);
   }
 
-  export function insertAtCursor(text:string, cursorOffset = 0) {
+export function insertAtCursor(text:string, cursorOffset = 0) {
     const {selectionStart:s, selectionEnd: e, value } = textareaEl;
     const updated = value.slice(0, s) + text + value.slice(e);
     textareaEl.value = updated;
@@ -94,6 +94,10 @@
     textareaEl.focus();
     textareaEl.setSelectionRange(cursor, cursor);
   }
+
+export function getTextarea(): HTMLTextAreaElement {
+  return textareaEl;
+}
 </script>
 <style>
   .editor-wrap {
