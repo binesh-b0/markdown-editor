@@ -29,6 +29,7 @@ body {
 
 .line-numbers {
   background: rgba(0, 0, 0, 0.04);
+  line-height: 1.5;
 }
 html.dark .line-numbers {
   background: rgba(255, 255, 255, 0.05);
@@ -93,6 +94,9 @@ textarea {
 }
 
 /* -------- markdown preview styling -------- */
+.preview-content {
+  line-height: 1.5;
+}
 .preview-content h1,
 .preview-content h2,
 .preview-content h3,
@@ -153,7 +157,10 @@ html.dark .preview-content code {
   overflow-x: auto;
 }
 .preview-content [data-line]:hover {
-  background: rgba(125, 125, 125, 0.1);
+  background: rgba(180, 180, 180, 0.15);
+}
+html.dark .preview-content [data-line]:hover {
+  background: rgba(255, 255, 255, 0.08);
 }
 html.dark .preview-content pre {
   background: #2b2b2b;

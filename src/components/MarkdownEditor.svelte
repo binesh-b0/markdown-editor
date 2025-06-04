@@ -9,6 +9,9 @@
     if (textareaEl) {
       textareaEl.style.height = 'auto';
       textareaEl.style.height = textareaEl.scrollHeight + 'px';
+      if (lineNumEl) {
+        lineNumEl.style.height = textareaEl.style.height;
+      }
     }
   }
  
@@ -16,14 +19,15 @@
     const lines = text.split('\n').length || 1;
     if (lineNumEl) {
       lineNumEl.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
+      lineNumEl.style.height = textareaEl ? textareaEl.style.height : 'auto';
     }
+    autoSize();
   }
 
   function handleInput(e: Event) {
     const val = (e.target as HTMLTextAreaElement).value;
     markdownContent.set(val);
     updateLines(val);
-    autoSize();
   }
 
   function handleKeyDown(e: KeyboardEvent) {
