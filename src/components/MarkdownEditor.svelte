@@ -13,8 +13,62 @@
 
   function handleInput(e: Event) {
     const val = (e.target as HTMLTextAreaElement).value;
-    markdownContent.set((e.target as HTMLTextAreaElement).value);
+    markdownContent.set(val);
     updateLines(val);
+  }
+
+  function handleKeyDown(e: KeyboardEvent) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const { selectionStart: s, selectionEnd: end, value } = textareaEl;
+      const startLine = value.lastIndexOf('\n', s - 1) + 1;
+      let endLine = value.indexOf('\n', end);
+      if (endLine === -1) endLine = value.length;
+      const lines = value.slice(startLine, endLine).split('\n');
+
+      const patched = lines
+        .map((ln) => {
+          if (e.shiftKey) {
+            if (ln.startsWith('    ')) return ln.slice(4);
+            if (ln.startsWith('\t')) return ln.slice(1);
+            return ln.replace(/^\s{1,4}/, '');
+          }
+          return '    ' + ln;
+        })
+        .join('\n');
+
+      const next = value.slice(0, startLine) + patched + value.slice(endLine);
+      textareaEl.value = next;
+      markdownContent.set(next);
+      const newEnd = startLine + patched.length;
+      textareaEl.setSelectionRange(startLine, newEnd);
+      updateLines(next);
+      return;
+    }
+
+    if (e.key === 'Enter') {
+      const { selectionStart: s, value } = textareaEl;
+      const prevStart = value.lastIndexOf('\n', s - 1) + 1;
+      const prevLine = value.slice(prevStart, s);
+      const olMatch = prevLine.match(/^(\s*)(\d+)\.\s+/);
+      const ulMatch = prevLine.match(/^(\s*)([-*+] )/);
+      if (olMatch) {
+        e.preventDefault();
+        const indent = olMatch[1];
+        const num = Number(olMatch[2]) + 1;
+        const insertion = `\n${indent}${num}. `;
+        insertAtCursor(insertion, 0);
+        return;
+      }
+      if (ulMatch) {
+        e.preventDefault();
+        const indent = ulMatch[1];
+        const bullet = ulMatch[2];
+        const insertion = `\n${indent}${bullet}`;
+        insertAtCursor(insertion, 0);
+        return;
+      }
+    }
   }
 
   $: updateLines($markdownContent);
@@ -73,6 +127,7 @@
   bind:this={textareaEl}
   bind:value={$markdownContent}
   on:input={handleInput}
+  on:keydown={handleKeyDown}
   spellcheck="false"
   placeholder="# Start typing Markdown..."
 ></textarea>

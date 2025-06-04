@@ -6,18 +6,33 @@
   import MarkdownEditor from '$components/MarkdownEditor.svelte';
   import MarkdownPreview from '$components/MarkdownPreview.svelte';
   import MetadataPanel from '$components/MetadataPanel.svelte';
+  import ConfirmDialog from '$components/ConfirmDialog.svelte';
 
   /* refs */
   let editorRef: InstanceType<typeof MarkdownEditor>;
   let hiddenInput: HTMLInputElement;
   let showMeta = false;
+  let confirmMsg = '';
+  let confirmResolve: (v: boolean) => void = () => {};
+
+  function ask(msg: string): Promise<boolean> {
+    confirmMsg = msg;
+    return new Promise((res) => {
+      confirmResolve = res;
+    });
+  }
+
+  function handleConfirm(val: boolean) {
+    confirmMsg = '';
+    confirmResolve(val);
+  }
 
   const hasNativeFS = typeof window !== 'undefined' && 'showOpenFilePicker' in window;
 
   /* ---------------- File Open / Save ---------------- */
 
   async function onOpen() {
-    if (get(dirty) && !confirm('You have unsaved work. Continue?')) return;
+    if (get(dirty) && !(await ask('You have unsaved work. Continue?'))) return;
     if (hasNativeFS) {
       try {
         const [handle] = await (window as any).showOpenFilePicker({
@@ -114,15 +129,56 @@ function bullets(prefix: string, ordered = false) {
 
   /* ---------------- Formatting helpers ---------------- */
 
+  function isInCodeBlock(pos: number) {
+    const ta = (editorRef as any).$$.ctx[0] as HTMLTextAreaElement;
+    const before = ta.value.slice(0, pos);
+    const fences = (before.match(/```/g) || []).length;
+    return fences % 2 === 1;
+  }
+
+  function safeWrap(p: string, sfx = p) {
+    const ta = (editorRef as any).$$.ctx[0] as HTMLTextAreaElement;
+    if (isInCodeBlock(ta.selectionStart)) {
+      ask('Cannot format text inside a code block');
+      return;
+    }
+    editorRef.wrapSelection(p, sfx, '');
+  }
+
+  function heading(level: number) {
+    const ta = (editorRef as any).$$.ctx[0] as HTMLTextAreaElement;
+    const { value, selectionStart: s, selectionEnd: e } = ta;
+    const startLine = value.lastIndexOf('\n', s - 1) + 1;
+    let endLine = value.indexOf('\n', e);
+    if (endLine === -1) endLine = value.length;
+    const lines = value.slice(startLine, endLine).split('\n');
+    const prefix = '#'.repeat(level) + ' ';
+
+    const patched = lines
+      .map((ln) => {
+        const stripped = ln.replace(/^#+\s+/, '');
+        if (ln.trim().startsWith(prefix)) return stripped;
+        return prefix + stripped;
+      })
+      .join('\n');
+
+    const next = value.slice(0, startLine) + patched + value.slice(endLine);
+    ta.value = next;
+    markdownContent.set(next);
+    const newEnd = startLine + patched.length;
+    ta.setSelectionRange(newEnd, newEnd);
+    ta.focus();
+  }
+
   const fmt = {
-    bold:    () => editorRef.wrapSelection('**', '**', ''),
-    italic:  () => editorRef.wrapSelection('_', '_', ''),
-    h1:      () => editorRef.wrapSelection('# ', '', ''),
-    h2:      () => editorRef.wrapSelection('## ', '', ''),
-    h3:      () => editorRef.wrapSelection('### ', '', ''),
-    h4:      () => editorRef.wrapSelection('#### ', '', ''),
-    h5:      () => editorRef.wrapSelection('##### ', '', ''),
-    h6:      () => editorRef.wrapSelection('###### ', '', ''),
+    bold:    () => safeWrap('**', '**'),
+    italic:  () => safeWrap('_', '_'),
+    h1:      () => heading(1),
+    h2:      () => heading(2),
+    h3:      () => heading(3),
+    h4:      () => heading(4),
+    h5:      () => heading(5),
+    h6:      () => heading(6),
     link:    () => editorRef.wrapSelection('[', '](https://)', ''),
     image:   () => editorRef.insertAtCursor('![alt](https://)', ),
     codeblk: () => editorRef.wrapSelection('```\n', '\n```', ''),
@@ -137,7 +193,11 @@ function bullets(prefix: string, ordered = false) {
 
   onMount(() => {
     const cached = localStorage.getItem('markdown-editor-content');
-    if (cached && confirm('Load previous session?')) markdownContent.set(cached);
+    if (cached) {
+      ask('Load previous session?').then((ok) => {
+        if (ok) markdownContent.set(cached);
+      });
+    }
 
     window.addEventListener('beforeunload', (e) => {
       if (get(dirty)) {
@@ -177,3 +237,6 @@ function bullets(prefix: string, ordered = false) {
     <MarkdownPreview />
   </div>
 </div>
+{#if confirmMsg}
+  <ConfirmDialog message={confirmMsg} onConfirm={handleConfirm} />
+{/if}

@@ -32,6 +32,14 @@
     font-size: 1rem;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: background var(--transition);
+  }
+  .toolbar button:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
+  html.dark .toolbar button:hover {
+    background: rgba(255, 255, 255, 0.1);
   }
   .group-divider {
     width: 1px;
