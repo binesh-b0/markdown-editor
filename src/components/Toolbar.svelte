@@ -9,6 +9,7 @@
 
   /* kebab menu toggle */
   let menuOpen = false;
+  let headOpen = false;
 
   function toggleTheme() {
     theme.update((t) => (t === 'light' ? 'dark' : 'light'));
@@ -77,7 +78,19 @@
   <!-- Formatting -->
   <button on:click={fmt.bold}    title="Bold **text** (⌘‑B)"><b>B</b></button>
   <button on:click={fmt.italic}  title="Italic _text_ (⌘‑I)"><i>I</i></button>
-  <button on:click={fmt.heading} title="Heading # (⌘‑H)">H1</button>
+  <div class="menu">
+    <button on:click={() => (headOpen = !headOpen)} title="Heading">H#</button>
+    {#if headOpen}
+      <div class="dropdown" on:mouseleave={() => (headOpen = false)}>
+        <button on:click={() => { headOpen = false; fmt.h1(); }}>H1</button>
+        <button on:click={() => { headOpen = false; fmt.h2(); }}>H2</button>
+        <button on:click={() => { headOpen = false; fmt.h3(); }}>H3</button>
+        <button on:click={() => { headOpen = false; fmt.h4(); }}>H4</button>
+        <button on:click={() => { headOpen = false; fmt.h5(); }}>H5</button>
+        <button on:click={() => { headOpen = false; fmt.h6(); }}>H6</button>
+      </div>
+    {/if}
+  </div>
   <button on:click={fmt.link}    title="Link [txt](url)">🔗</button>
   <button on:click={fmt.image}   title="Image ![alt](url)">🖼️</button>
   <button on:click={fmt.codeblk} title="Code block ```">⎇</button>
