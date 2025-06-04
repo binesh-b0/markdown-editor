@@ -64,23 +64,40 @@
     });
   }
 /* --- Ordered & Unordered list helpers --- */
-function bullets(prefix: string) {
+function bullets(prefix: string, ordered = false) {
   const el = editorRef;             // textarea wrapper component
   const ta = (el as any).$$.ctx[0]; // raw <textarea> element
   const { value, selectionStart: s, selectionEnd: e } = ta;
 
   // Grab the selected block (or current line if nothing selected)
   const startLine = value.lastIndexOf('\n', s - 1) + 1;
-  const endLine   = e < value.length ? value.indexOf('\n', e) : value.length;
-  const block     = value.slice(startLine, endLine);
-  const lines     = block.split('\n');
+  let endLine = value.indexOf('\n', e);
+  if (endLine === -1) endLine = value.length;
+  const block  = value.slice(startLine, endLine);
+  const lines  = block.split('\n');
 
   const patched = lines
     .map((ln: string, i: number) => {
-      // If the line already starts with the prefix, toggle it off
-      if (ln.trimStart().startsWith(prefix.trim())) return ln.replace(prefix, '');
-      // For OL we increment numbers; for UL we reuse the prefix
-      return prefix.includes('1.') ? `${i + 1}. ${ln}` : `${prefix}${ln}`;
+      const indent = ln.match(/^\s*/)?.[0] ?? '';
+      let text = ln.slice(indent.length);
+
+      if (ordered) {
+        const match = text.match(/^\d+\.\s+/);
+        if (match) {
+          // toggle off existing numbered list
+          text = text.slice(match[0].length);
+        } else {
+          text = `${i + 1}. ${text}`;
+        }
+      } else {
+        if (text.startsWith(prefix.trim())) {
+          text = text.slice(prefix.trim().length);
+        } else {
+          text = prefix + text;
+        }
+      }
+
+      return indent + text;
     })
     .join('\n');
 
@@ -110,8 +127,8 @@ function bullets(prefix: string) {
     image:   () => editorRef.insertAtCursor('![alt](https://)', ),
     codeblk: () => editorRef.wrapSelection('```\n', '\n```', ''),
     inline:  () => editorRef.wrapSelection('`', '`', 'code'),
-    ul:      () => editorRef.wrapSelection('- ', '', ''),
-    ol:      () => editorRef.wrapSelection('1. ', '', ''),
+    ul:      () => bullets('- '),
+    ol:      () => bullets('1. ', true),
     quote:   () => editorRef.wrapSelection('> ', '', ''),
     hr:      () => editorRef.insertAtCursor('\n---\n')
   };
