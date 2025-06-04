@@ -1,8 +1,16 @@
 <script lang="ts">
   import { markdownContent } from '$lib/stores';
+  import { onMount } from 'svelte';
 
   let textareaEl: HTMLTextAreaElement;
   let lineNumEl: HTMLElement;
+
+  function autoSize() {
+    if (textareaEl) {
+      textareaEl.style.height = 'auto';
+      textareaEl.style.height = textareaEl.scrollHeight + 'px';
+    }
+  }
  
   function updateLines(text: string) {
     const lines = text.split('\n').length || 1;
@@ -15,6 +23,7 @@
     const val = (e.target as HTMLTextAreaElement).value;
     markdownContent.set(val);
     updateLines(val);
+    autoSize();
   }
 
   function handleKeyDown(e: KeyboardEvent) {
@@ -72,6 +81,24 @@
   }
 
   $: updateLines($markdownContent);
+  $: autoSize();
+  onMount(autoSize);
+
+  export function highlightLine(line: number | null) {
+    if (!textareaEl || line == null) return;
+    const lines = textareaEl.value.split('\n');
+    const start = lines.slice(0, line - 1).join('\n').length + (line > 1 ? 1 : 0);
+    const end = start + lines[line - 1].length;
+    textareaEl.setSelectionRange(start, end);
+  }
+
+  export function jumpToLine(line: number) {
+    if (!textareaEl) return;
+    const lines = textareaEl.value.split('\n');
+    const pos = lines.slice(0, line - 1).join('\n').length + (line > 1 ? 1 : 0);
+    textareaEl.focus();
+    textareaEl.setSelectionRange(pos, pos);
+  }
 
 export function wrapSelection(prefix: string, suffix = prefix, placeholder = '') {
     const { selectionStart: s, selectionEnd: e, value } = textareaEl;
@@ -117,6 +144,8 @@ export function getTextarea(): HTMLTextAreaElement {
     padding: 0.5rem 0.75rem;
     border: none;
     resize: none;
+    overflow-y: hidden;
+    height: auto;
     font-family: var(--mono);
     line-height: 1.5;
     background: inherit;
