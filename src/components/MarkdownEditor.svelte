@@ -18,7 +18,7 @@
   function updateLines(text: string) {
     const lines = text.split('\n').length || 1;
     if (lineNumEl) {
-      lineNumEl.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
+      lineNumEl.innerHTML = Array.from({ length: lines }, (_, i) => `<div>${i + 1}</div>`).join('');
       lineNumEl.style.height = textareaEl ? textareaEl.style.height : 'auto';
     }
     autoSize();
