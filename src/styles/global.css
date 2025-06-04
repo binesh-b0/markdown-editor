@@ -63,6 +63,12 @@ html.dark body {
   padding: 1rem;
   overflow: auto;
 }
+.preview-pane {
+  scrollbar-width: none; /* Firefox */
+}
+.preview-pane::-webkit-scrollbar {
+  display: none;
+}
 .pane + .pane {
   border-left: 1px solid var(--border);
 }
@@ -138,6 +144,9 @@ html.dark .preview-content code {
   padding: 0.75rem;
   border-radius: 6px;
   overflow-x: auto;
+}
+.preview-content [data-line]:hover {
+  background: rgba(125, 125, 125, 0.1);
 }
 html.dark .preview-content pre {
   background: #2b2b2b;
