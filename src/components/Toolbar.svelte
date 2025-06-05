@@ -7,10 +7,10 @@
 	export let fmt: Record<string, () => void>;
 	export let showMetaPanel: () => void;
 
-	/* kebab menu toggle */
-	let menuOpen = false;
-	let headOpen = false;
-	let advOpen = false;
+        /* menu toggle flags */
+        let menuOpen = false;
+        let headOpen = false;
+        let advOpen = false;
 
 	function toggleTheme() {
 		theme.update((t) => (t === 'light' ? 'dark' : 'light'));
@@ -21,7 +21,7 @@
 	}
 </script>
 
-<div class="toolbar">
+<div class="toolbar" role="toolbar" aria-label="Editor toolbar">
 	<!-- File -->
 	<button on:click={onOpen} title="Open (⌘‑O)" aria-label="Open file">📂 Open</button>
 	<button on:click={onSave} title="Download (⌘‑S)" aria-label="Download file">💾 Download</button>
@@ -95,14 +95,15 @@
 	<button on:click={fmt.ol} title="1. List">1.</button>
 	<button on:click={fmt.quote} title="> Quote">❝</button>
 	<button on:click={fmt.hr} title="Horizontal rule ---">—</button>
-	<div class="menu">
-		<button
-			on:click={() => (advOpen = !advOpen)}
-			title="Advanced formatting"
-			aria-haspopup="true"
-			aria-expanded={advOpen}>⚙️</button
-		>
-		{#if advOpen}
+        <div class="menu">
+                <button
+                        on:click={() => (advOpen = !advOpen)}
+                        class="advanced-btn"
+                        aria-haspopup="true"
+                        aria-expanded={advOpen}
+                        aria-label="Advanced formatting"
+                >Advanced ▾</button>
+                {#if advOpen}
 			<div
 				class="dropdown"
 				on:mouseleave={() => (advOpen = false)}
@@ -138,9 +139,14 @@
 	<button on:click={toggleTheme} title="Toggle theme" aria-label="Toggle theme">
 		{#if $theme === 'light'}🌙{:else}🌞{/if}
 	</button>
-	<button on:click={toggleLines} title="Toggle line numbers" aria-label="Toggle line numbers">
-		{#if $showLineNumbers}Hide lines{:else}Show lines{/if}
-	</button>
+        <button
+                on:click={toggleLines}
+                class="line-toggle"
+                aria-label="Toggle line numbers"
+                aria-pressed={$showLineNumbers}
+        >
+                {#if $showLineNumbers}Hide line numbers{:else}Show line numbers{/if}
+        </button>
 
 	<!-- kebab -->
 	<div class="menu">
@@ -164,8 +170,14 @@
 	</div>
 
 	<!-- Dirty flag -->
-	{#if $dirty}<span class="unsaved-dot" aria-label="Unsaved changes" title="Unsaved changes"
-		></span>{/if}
+        {#if $dirty}
+                <span
+                        class="unsaved-dot"
+                        aria-label="Unsaved changes"
+                        title="Unsaved changes"
+                        aria-live="polite"
+                ></span>
+        {/if}
 </div>
 
 <!-- svelte-ignore css_unused_selector -->
@@ -186,15 +198,19 @@
 		background: linear-gradient(135deg, #2b2b2b, #363636);
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 	}
-	.toolbar button {
-		background: none;
-		border: none;
-		font-size: 1rem;
-		cursor: pointer;
-		padding: 0.25rem 0.5rem;
-		border-radius: var(--radius);
-		transition: background var(--transition);
-	}
+        .toolbar button {
+                background: none;
+                border: none;
+                font-size: 1rem;
+                cursor: pointer;
+                padding: 0.25rem 0.5rem;
+                border-radius: var(--radius);
+                transition: background var(--transition);
+        }
+        .line-toggle,
+        .advanced-btn {
+                font-size: 0.9rem;
+        }
 	.toolbar button:hover {
 		background: rgba(0, 0, 0, 0.05);
 	}
@@ -248,19 +264,20 @@
 		text-align: left;
 		padding: 0.4rem 0.75rem;
 	}
-	@media (max-width: 600px) {
-		.toolbar {
-			flex-direction: column;
-			align-items: stretch;
-		}
-		.group-divider {
-			width: 100%;
-			height: 1px;
-			margin: 0.25rem 0;
-		}
-		.unsaved-dot {
-			align-self: flex-end;
-			margin-left: 0;
-		}
-	}
+        @media (max-width: 600px) {
+                .toolbar {
+                        flex-direction: column;
+                        align-items: stretch;
+                        gap: 0.5rem;
+                }
+                .group-divider {
+                        width: 100%;
+                        height: 1px;
+                        margin: 0.25rem 0;
+                }
+                .unsaved-dot {
+                        align-self: flex-end;
+                        margin-left: 0;
+                }
+        }
 </style>
