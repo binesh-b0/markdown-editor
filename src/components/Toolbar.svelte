@@ -89,7 +89,7 @@
   <div class="menu">
     <button on:click={() => (headOpen = !headOpen)} title="Heading">H#</button>
     {#if headOpen}
-      <div class="dropdown" on:mouseleave={() => (headOpen = false)}>
+      <div class="dropdown" on:mouseleave={() => (headOpen = false)} aria-label="Heading" role="menu" tabindex="-1">
         <button on:click={() => { headOpen = false; fmt.h1(); }}>H1</button>
         <button on:click={() => { headOpen = false; fmt.h2(); }}>H2</button>
         <button on:click={() => { headOpen = false; fmt.h3(); }}>H3</button>
@@ -119,7 +119,7 @@
   <div class="menu">
     <button on:click={() => (menuOpen = !menuOpen)} title="More">⋯</button>
     {#if menuOpen}
-      <div class="dropdown" on:mouseleave={() => (menuOpen = false)}>
+      <div class="dropdown" on:mouseleave={() => (menuOpen = false)} aria-label="More options" role="menu" tabindex="-1">
         <button on:click={() => { menuOpen = false; showMetaPanel(); }}>📝 Metadata</button>
       </div>
     {/if}

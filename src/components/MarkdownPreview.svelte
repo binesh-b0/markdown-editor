@@ -20,6 +20,9 @@
   on:mouseover={onHover}
   on:mouseleave={() => dispatch('highlight', { line: null })}
   on:click={onClick}
+  role="notebook"
+  tabindex="0"
+  on:focus={() => dispatch('highlight', { line: null })}
 >
   {@html $htmlContent}
 </div>
