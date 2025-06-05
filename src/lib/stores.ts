@@ -23,7 +23,9 @@ export function markSaved(val: string) {
 
 const savedTheme =
 	typeof localStorage !== 'undefined' ? localStorage.getItem('markdown-editor-theme') : null;
-export const theme = writable<'light' | 'dark'>((savedTheme as any) ?? 'light');
+export const theme = writable<'light' | 'dark'>(
+	savedTheme === 'dark' || savedTheme === 'light' ? (savedTheme as 'light' | 'dark') : 'light'
+);
 
 /* ------------ file name ------------ */
 const savedName =
