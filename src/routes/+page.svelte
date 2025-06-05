@@ -220,12 +220,7 @@ function bullets(prefix: string, ordered = false) {
       });
     }
 
-    window.addEventListener('beforeunload', (e) => {
-      if (get(dirty)) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    });
+    // removed native unload prompt to avoid intrusive dialogs
   });
 </script>
 

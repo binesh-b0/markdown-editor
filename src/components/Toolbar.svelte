@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { theme, dirty } from '$lib/stores';
+  import { theme, dirty, editorSettings, showLineNumbers } from '$lib/stores';
 
   /* handlers passed from +page */
   export let onOpen: () => void;
@@ -13,6 +13,10 @@
 
   function toggleTheme() {
     theme.update((t) => (t === 'light' ? 'dark' : 'light'));
+  }
+
+  function toggleLines() {
+    editorSettings.update((s) => ({ ...s, showLineNumbers: !s.showLineNumbers }));
   }
 </script>
 
@@ -113,6 +117,9 @@
   <!-- Theme -->
   <button on:click={toggleTheme} title="Toggle theme">
     {#if $theme === 'light'}🌙{:else}🌞{/if}
+  </button>
+  <button on:click={toggleLines} title="Toggle line numbers">
+    {#if $showLineNumbers}🔢{:else}🚫🔢{/if}
   </button>
 
   <!-- kebab -->

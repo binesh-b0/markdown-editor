@@ -38,6 +38,31 @@ theme.subscribe((t) => {
   }
 });
 
+/* ------------ editor settings ------------ */
+
+export interface EditorSettings {
+  showLineNumbers: boolean;
+}
+
+const defaultSettings: EditorSettings = { showLineNumbers: true };
+
+const savedSettings =
+  typeof localStorage !== 'undefined'
+    ? localStorage.getItem('markdown-editor-settings')
+    : null;
+
+export const editorSettings = writable<EditorSettings>(
+  savedSettings ? { ...defaultSettings, ...JSON.parse(savedSettings) } : defaultSettings
+);
+
+editorSettings.subscribe((val) => {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('markdown-editor-settings', JSON.stringify(val));
+  }
+});
+
+export const showLineNumbers = derived(editorSettings, (s) => s.showLineNumbers);
+
 /* ------------ throttled localStorage autosave ------------ */
 
 if (typeof window !== 'undefined') {

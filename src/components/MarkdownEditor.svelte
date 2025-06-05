@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { markdownContent } from '$lib/stores';
-  import { onMount } from 'svelte';
+  import { markdownContent, showLineNumbers } from '$lib/stores';
+  import { onMount, tick } from 'svelte';
+  import { get } from 'svelte/store';
 
   let textareaEl: HTMLTextAreaElement;
   let lineNumEl: HTMLElement;
@@ -16,12 +17,11 @@
   }
  
   function updateLines(text: string) {
-    const lines = text.split('\n').length || 1;
-    if (lineNumEl) {
-      lineNumEl.innerHTML = Array.from({ length: lines }, (_, i) => `<div>${i + 1}</div>`).join('');
-      lineNumEl.style.height = textareaEl ? textareaEl.style.height : 'auto';
-    }
     autoSize();
+    if (!get(showLineNumbers) || !lineNumEl) return;
+    const lines = text.split('\n').length || 1;
+    lineNumEl.innerHTML = Array.from({ length: lines }, (_, i) => `<div>${i + 1}</div>`).join('');
+    lineNumEl.style.height = textareaEl ? textareaEl.style.height : 'auto';
   }
 
   function handleInput(e: Event) {
@@ -84,9 +84,8 @@
     }
   }
 
-  $: updateLines($markdownContent);
-  $: autoSize();
-  onMount(autoSize);
+  $: (async () => { await tick(); updateLines($markdownContent); })();
+  onMount(() => updateLines($markdownContent));
 
   export function highlightLine(line: number | null) {
     if (!textareaEl || line == null) return;
@@ -159,7 +158,7 @@ export function getTextarea(): HTMLTextAreaElement {
 </style>
 <!-- textarea automatically bound via store subscription -->
 <div class = "editor-wrap">
-    <pre class="line-numbers" bind:this={lineNumEl}></pre>
+    <pre class="line-numbers" bind:this={lineNumEl} style="display: {$showLineNumbers ? 'block' : 'none'}"></pre>
     <textarea
   bind:this={textareaEl}
   bind:value={$markdownContent}
