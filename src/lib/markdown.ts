@@ -3,46 +3,45 @@ import hljs from 'highlight.js';
 
 import mkfootnote from 'markdown-it-footnote';
 // import mkdeflist from 'markdown-it-deflist';
-import { full as emoji } from 'markdown-it-emoji'
+import { full as emoji } from 'markdown-it-emoji';
 // import mkmark from 'markdown-it-mark';
 // import mksub from 'markdown-it-sub';
 // import mksup from 'markdown-it-sup';
 // import mktask from 'markdown-it-task-lists';
-import mkanchor from 'markdown-it-anchor';
 // helper to annotate blocks with source line numbers
 function lineNumbers(md: MarkdownIt) {
-  md.core.ruler.after('block', 'line-numbers', (state) => {
-    state.tokens.forEach((t) => {
-      if (t.map && t.type.endsWith('_open')) {
-        t.attrSet('data-line', String(t.map[0] + 1));
-      }
-    });
-  });
+	md.core.ruler.after('block', 'line-numbers', (state) => {
+		state.tokens.forEach((t) => {
+			if (t.map && t.type.endsWith('_open')) {
+				t.attrSet('data-line', String(t.map[0] + 1));
+			}
+		});
+	});
 }
 export const md: MarkdownIt = new MarkdownIt({
-    html: true,
-    linkify: true,
-    typographer: true,
-    highlight:(code:string,lang:string) => {
-        if (lang && hljs.getLanguage(lang)) {
-            try{
-                return `<pre class="hljs"><code>${
-                hljs.highlight(code, { language: lang }).value
-                }</code></pre>`;
-            } catch {
-                console.log(`Error highlighting code with language ${lang}`);
-            }
-        }
-         return `<pre class="hljs"><code>${md.utils.escapeHtml(code)}</code></pre>`;
-    }
+	html: true,
+	linkify: true,
+	typographer: true,
+	highlight: (code: string, lang: string) => {
+		if (lang && hljs.getLanguage(lang)) {
+			try {
+				return `<pre class="hljs"><code>${
+					hljs.highlight(code, { language: lang }).value
+				}</code></pre>`;
+			} catch {
+				console.log(`Error highlighting code with language ${lang}`);
+			}
+		}
+		return `<pre class="hljs"><code>${md.utils.escapeHtml(code)}</code></pre>`;
+	}
 })
- // Footnotes: [^1], etc.
-  .use(mkfootnote)
-//   // Definition lists: term\n: definition
-//   .use(mkdeflist)
-//   // Emoji shortcodes like :joy:
-  .use(emoji)
-  .use(lineNumbers)
+	// Footnotes: [^1], etc.
+	.use(mkfootnote)
+	//   // Definition lists: term\n: definition
+	//   .use(mkdeflist)
+	//   // Emoji shortcodes like :joy:
+	.use(emoji)
+	.use(lineNumbers);
 //   // ==highlight==
 //   .use(mkmark)
 //   // Subscript: H~2~O
@@ -50,23 +49,7 @@ export const md: MarkdownIt = new MarkdownIt({
 //   // Superscript: X^2^
 //   .use(mksup)
 //   // Task lists: - [ ] or - [x]
-//   .use(mktask, { enabled: true })
-//   // Heading anchors: ### Title {#custom-id}
-  // .use(mkanchor, {
-  //   // let `{#my-id}` syntax work
-  //   permalink: mkanchor.permalink.linkInsideHeader({
-  //     symbol: '¶',
-  //     placement: 'after'
-  //   }),
-  //   slugify: (s: string) =>
-  //     encodeURIComponent(
-  //       String(s)
-  //         .trim()
-  //         .toLowerCase()
-  //         .replace(/\s+/g, '-')
-  //     )
-  // });
 
 export function renderMarkdown(markdown: string): string {
-    return md.render(markdown);
+	return md.render(markdown);
 }

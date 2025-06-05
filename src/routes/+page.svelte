@@ -37,7 +37,11 @@
 		if (get(dirty) && !(await ask('You have unsaved work. Continue?'))) return;
 		if (hasNativeFS) {
 			try {
-				const [handle] = await (window as any).showOpenFilePicker({
+				const [handle] = await (
+					window as Window & {
+						showOpenFilePicker(options?: unknown): Promise<FileSystemFileHandle[]>;
+					}
+				).showOpenFilePicker({
 					types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }]
 				});
 				const file = await handle.getFile();
@@ -45,7 +49,9 @@
 				markdownContent.set(text);
 				fileName.set(file.name.replace(/\.md$/, ''));
 				markSaved(text);
-			} catch {}
+			} catch {
+				// ignore user cancellation
+			}
 		} else hiddenInput.click();
 	}
 
@@ -53,7 +59,11 @@
 		const txt = get(markdownContent);
 		if (hasNativeFS) {
 			try {
-				const handle = await (window as any).showSaveFilePicker({
+				const handle = await (
+					window as Window & {
+						showSaveFilePicker(options?: unknown): Promise<FileSystemFileHandle>;
+					}
+				).showSaveFilePicker({
 					suggestedName: `${get(fileName)}.md`,
 					types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md'] } }]
 				});
@@ -61,7 +71,9 @@
 				await w.write(txt);
 				await w.close();
 				markSaved(txt);
-			} catch {}
+			} catch {
+				// ignore user cancellation
+			}
 		} else {
 			const blob = new Blob([txt], { type: 'text/markdown' });
 			const url = URL.createObjectURL(blob);
