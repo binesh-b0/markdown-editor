@@ -141,6 +141,7 @@ export function getTextarea(): HTMLTextAreaElement {
     border-right: 1px solid var(--border);
     font-family: var(--mono);
     opacity: 0.6;
+    border-radius: var(--radius) 0 0 var(--radius);
   }
   textarea {
     flex: 1;
@@ -149,6 +150,8 @@ export function getTextarea(): HTMLTextAreaElement {
     resize: none;
     overflow-y: hidden;
     height: auto;
+    white-space: pre;
+    border-radius: var(--radius);
     font-family: var(--mono);
     line-height: 1.5;
     background: inherit;

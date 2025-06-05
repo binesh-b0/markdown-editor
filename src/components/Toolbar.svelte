@@ -29,6 +29,13 @@
     padding: 0 0.75rem;
     gap: 0.25rem;
     border-bottom: 1px solid var(--border);
+    background: linear-gradient(135deg, var(--bg-light), #f0f0f7);
+    border-radius: var(--radius) var(--radius) 0 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  html.dark .toolbar {
+    background: linear-gradient(135deg, #2b2b2b, #363636);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
   }
   .toolbar button {
     background: none;
@@ -36,7 +43,7 @@
     font-size: 1rem;
     cursor: pointer;
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
+    border-radius: var(--radius);
     transition: background var(--transition);
   }
   .toolbar button:hover {
@@ -55,6 +62,7 @@
     margin-left: auto;
     color: #d9534f;
     font-style: italic;
+    font-weight: bold;
   }
   html.dark .unsaved { color: #e07a5f; }
 
@@ -83,7 +91,7 @@
 <div class="toolbar">
   <!-- File -->
   <button on:click={onOpen} title="Open (⌘‑O)">📂 Open</button>
-  <button on:click={onSave} title="Save / Download (⌘‑S)">💾 Save</button>
+  <button on:click={onSave} title="Download (⌘‑S)">💾 Download</button>
 
   <div class="group-divider"></div>
 
