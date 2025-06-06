@@ -13,7 +13,7 @@
 	let advOpen = false;
 
 	// width of filename input adapts to content length
-	$: size = Math.max($fileName.length, 1);
+	$: size = Math.max($fileName.length, 10);
 
 	function toggleTheme() {
 		theme.update((t) => (t === 'light' ? 'dark' : 'light'));
@@ -24,10 +24,19 @@
 	}
 </script>
 
-<div class="toolbar" role="toolbar" aria-label="Editor toolbar">
+<div class="toolbar" class:dark={$theme==='dark'} role="toolbar" aria-label="Editor toolbar">
 	<!-- File -->
 	<button on:click={onOpen} title="Open (⌘-O)" aria-label="Open file">📂 Open</button>
 	<button on:click={onSave} title="Download (⌘-S)" aria-label="Download file">💾 Download</button>
+		<!-- Dirty flag -->
+	{#if $dirty}
+		<span
+			class="unsaved-dot"
+			aria-label="Unsaved changes"
+			title="Unsaved changes"
+			aria-live="polite"
+		></span>
+	{/if}
 	<input
 		class="filename"
 		type="text"
@@ -35,15 +44,16 @@
 		aria-label="File name"
 		placeholder="Untitled"
 		{size}
+		style="background: transparent; color: var(--text); border-bottom: 1px solid var(--border);"
 	/>
 
 	<div class="group-divider"></div>
 
 	<!-- Formatting -->
-	<button on:click={fmt.bold} title="Bold **text** (⌘‑B)"><b>B</b></button>
-	<button on:click={fmt.italic} title="Italic _text_ (⌘‑I)"><i>I</i></button>
+	<button on:click={fmt.bold} title="Bold **text** (⌘‑B)"><b>Bold</b></button>
+	<button on:click={fmt.italic} title="Italic _text_ (⌘‑I)"><i>Italic</i></button>
 	<div class="menu">
-		<button on:click={() => (headOpen = !headOpen)} title="Heading">H#</button>
+		<button on:click={() => (headOpen = !headOpen)} title="Heading">Heading</button>
 		{#if headOpen}
 			<div
 				class="dropdown"
@@ -141,7 +151,7 @@
 
 	<!-- Theme -->
 	<button on:click={toggleTheme} title="Toggle theme" aria-label="Toggle theme">
-		{#if $theme === 'light'}🌙{:else}🌞{/if}
+		{#if $theme === 'light'}🌙 dark{:else}🌞 light{/if}
 	</button>
 	<button
 		on:click={toggleLines}
@@ -173,15 +183,7 @@
 		{/if}
 	</div>
 
-	<!-- Dirty flag -->
-	{#if $dirty}
-		<span
-			class="unsaved-dot"
-			aria-label="Unsaved changes"
-			title="Unsaved changes"
-			aria-live="polite"
-		></span>
-	{/if}
+
 </div>
 
 <!-- svelte-ignore css_unused_selector -->
@@ -198,10 +200,10 @@
 		border-radius: var(--radius) var(--radius) 0 0;
 		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 	}
-	html.dark .toolbar {
-		background: linear-gradient(135deg, #2b2b2b, #363636);
-		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-	}
+	.toolbar.dark {
+			background: linear-gradient(135deg, #2b2b2b, #363636);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+		}
 	.toolbar button {
 		background: none;
 		border: none;
@@ -218,9 +220,9 @@
 	.toolbar button:hover {
 		background: rgba(0, 0, 0, 0.05);
 	}
-	html.dark .toolbar button:hover {
-		background: rgba(255, 255, 255, 0.1);
-	}
+	.toolbar.dark button:hover {
+			background: rgba(255, 255, 255, 0.1);
+		}
 	.group-divider {
 		width: 1px;
 		height: 60%;
@@ -240,9 +242,9 @@
 		border-bottom: 1px solid var(--border);
 	}
 	.unsaved-dot {
-		margin-left: auto;
-		width: 0.75rem;
-		height: 0.75rem;
+		display: inline-block;
+		width: 0.2rem;
+		height: 0.2rem;
 		border-radius: 50%;
 		background: #d9534f;
 	}
