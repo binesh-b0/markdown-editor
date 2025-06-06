@@ -38,7 +38,7 @@
 		if (hasNativeFS) {
 			try {
 				const [handle] = await (
-					window as Window & {
+					window as unknown as Window & {
 						showOpenFilePicker(options?: unknown): Promise<FileSystemFileHandle[]>;
 					}
 				).showOpenFilePicker({
@@ -60,7 +60,7 @@
 		if (hasNativeFS) {
 			try {
 				const handle = await (
-					window as Window & {
+					window as unknown as Window & {
 						showSaveFilePicker(options?: unknown): Promise<FileSystemFileHandle>;
 					}
 				).showSaveFilePicker({
@@ -244,7 +244,8 @@
 </script>
 
 <svelte:head>
-	<title>{$fileName}</title>
+	<title>{$fileName || "Untitled"}</title>
+	<meta name="description" content="A markdown editor" />
 </svelte:head>
 
 <!-- hidden input fallback -->
